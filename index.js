@@ -1,9 +1,9 @@
-const  express = require("express")
+const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const dotenv = require("dotenv");
 
-const app = express ();
+const app = express();
 dotenv.config();
 
 const port = process.env.PORT || 3000;
@@ -12,58 +12,58 @@ const username = process.env.MONGODB_USERNAME;
 const password = process.env.MONGODB_PASSWORD;
 
 mongoose.connect(`mongodb+srv://${username}:${password}@cluster0.fhgetb4.mongodb.net/?retryWrites=true&w=majority`, {
-    useNewUrlParser : true,
-    useUnifiedTopolgy : true,
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
 });
-// registration schema
+
+// Registration schema
 const registrationSchema = new mongoose.Schema({
-    nmae : String,
-    email :String,
-    password : String
+    name: String, // Fixed typo here
+    email: String,
+    password: String
 });
-// model of registration schema
-const Registraion = mongoose.model("Registration", registraionSchema );
 
-app.use(bodyParsser.urlencoded ({ extended: true}));
+// Model of registration schema
+const Registration = mongoose.model("Registration", registrationSchema);
+
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-
 
 app.get("/", (req, res) => {
     res.sendFile(__dirname + "/pages/index.html");
-})
+});
 
-app.post("/register", async (req,res) =>{
-    try{
-        const {name, email,password} =req.body;
+app.post("/register", async (req, res) => {
+    try {
+        const { name, email, password } = req.body;
 
-        const existingUser = await registrationData.findOne({email : email});
-        if(!existingUser){
-            const registrationData = new registrationSchema({
+        const existingUser = await Registration.findOne({ email: email });
+        if (!existingUser) {
+            const registrationData = new Registration({
                 name,
                 email,
                 password
             });
             await registrationData.save();
-            res.redirect("/success");    
+            res.redirect("/success");
+        } else {
+            console.log("User already exists");
+            res.redirect("/error");
         }
-      else{
-        console.log("User already exist");
-        res.redirect("/error");
-      } 
-    }
-    catch (error){
+    } catch (error) {
         console.log(error);
-        registrationSchema.redirect("error");
+        res.redirect("/error"); // Fixed typo here
     }
-})
+});
 
-app.get("/sucess", (req, res)=>{
-    res.sendFile (__dirname+"/pages/success.html") ;
-})
-app.get("/error", (req, res)=>{
-    res.sendFile (__dirname+"/pages/error.html") ;
-})
+app.get("/success", (req, res) => {
+    res.sendFile(__dirname + "/pages/success.html");
+});
 
-app.listen(port, ()=>{
-    console.log(`server is running on port ${port}`);
-})
+app.get("/error", (req, res) => {
+    res.sendFile(__dirname + "/pages/error.html");
+});
+
+app.listen(port, () => {
+    console.log(`Server is running on port ${port}`);
+});
